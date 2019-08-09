@@ -1,30 +1,32 @@
 package swingga;
 
-import java.util.Random;
 
 public class Critter {
-	private Random rand = new Random();
-	public int xRandMax, yRandMax, xRandOff, yRandOff, xRandLimit, yRandLimit;
+	// current location
 	public int x, y;
+	// memory of last location
 	public int mx, my;
-	public Critter(int x, int y, int xRandMax, int yRandMax, int xRandOff, int yRandOff, int xRandLimit, int yRandLimit) {
+	// movement algorithm
+	private CritterMovement movement;
+	public Critter(int x, int y, CritterMovement movement) {
 		this.x = x;
 		this.y = y;
-		this.xRandMax = xRandMax;
-		this.yRandMax = yRandMax;
-		this.xRandOff = xRandOff;
-		this.yRandOff = yRandOff;
-		this.xRandLimit = xRandLimit;
-		this.yRandLimit = yRandLimit;
+		this.mx = x;
+		this.my = y;
+		this.movement = movement;
 	}
-	public void move() {
-		mx = Math.min(xRandLimit, Math.max(-xRandLimit, mx + (xRandOff - rand.nextInt(xRandMax))));
-		my = Math.min(yRandLimit, Math.max(-yRandLimit, my + (yRandOff - rand.nextInt(yRandMax))));
-		x = Math.min(990, Math.max(10, x + mx));
-		y = Math.min(990, Math.max(10, y + my));
-	}
+	
 	@Override
 	public String toString() {
 		return super.toString() + "[" + x +"," + y + "," + mx +"," + my + "]";
 	}
+
+	public void move() {
+		movement.moveCritter(this);
+	}
+
+	public CritterMovement getMovement() {
+		return movement;
+	}
+
 }
