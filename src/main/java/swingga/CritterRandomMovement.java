@@ -10,6 +10,8 @@ import java.util.Random;
 public class CritterRandomMovement implements CritterMovement {
 	private static final Random rand = new Random();
 	public int xRandMax, yRandMax, xRandOff, yRandOff, xRandLimit, yRandLimit;
+	// memory of last motion amount
+	private int mx, my;
 
 	CritterRandomMovement( int xRandMax, int yRandMax, int xRandOff, int yRandOff, int xRandLimit, int yRandLimit) {
 		this.xRandMax = xRandMax;
@@ -22,10 +24,10 @@ public class CritterRandomMovement implements CritterMovement {
 
 	@Override
 	public void moveCritter(Critter c) {
-		c.mx = Math.min(xRandLimit, Math.max(-xRandLimit, c.mx + (xRandOff - rand.nextInt(xRandMax))));
-		c.my = Math.min(yRandLimit, Math.max(-yRandLimit, c.my + (yRandOff - rand.nextInt(yRandMax))));
-		c.x = Math.min(990, Math.max(10, c.x + c.mx));
-		c.y = Math.min(990, Math.max(10, c.y + c.my));
+		mx = Math.min(xRandLimit, Math.max(-xRandLimit, mx + (xRandOff - rand.nextInt(xRandMax))));
+		my = Math.min(yRandLimit, Math.max(-yRandLimit, my + (yRandOff - rand.nextInt(yRandMax))));
+		c.x = Math.min(990, Math.max(10, c.x + mx));
+		c.y = Math.min(990, Math.max(10, c.y + my));
 	}
 	@Override
 	public CritterMovement cloneAndMutate() {

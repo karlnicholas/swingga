@@ -27,10 +27,9 @@ public class SimulationThread implements Runnable {
 		for ( int i = 0; i < 100; ++i ) {
 			critters.add(new Critter(
 					cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
-					new CritterRandomMovement(3, 3, 1, 1, 4, 4) 
+					new CritterTuringMovement() 
 					));
 		}
-		
 	}
 	@Override
 	public void run() {
@@ -49,7 +48,7 @@ public class SimulationThread implements Runnable {
 
 			myPanel.repaint();
 			if ( counter % 20 == 0 ) {
-				printAverages();
+//				printAverages();
 				reproduceAndMutate(critters);
 			}
 		}
