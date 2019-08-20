@@ -24,5 +24,12 @@ public class Critter {
 	public CritterMovement getMovement() {
 		return movement;
 	}
+	public void checkBounds() {
+		if ( x < 0 ) x = 1000 + x;
+		if ( x > 1000 ) x = x - 1000;
+		if ( y < 0 ) y = 1000 + y;
+		if ( y > 1000 ) y = y - 1000;
+		
+	}
 
 }

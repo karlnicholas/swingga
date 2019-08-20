@@ -31,10 +31,9 @@ public class SwingGa extends JFrame {
 
 	    public void paintComponent(Graphics g) {
 	        super.paintComponent(g);       
-	    	Graphics2D g2D = (Graphics2D)  g;
-	    	simulationThread.drawCritters(g2D);
+	    	Graphics2D g2d = (Graphics2D)  g;
+	    	simulationThread.drawScreenItems(g2d);
 	    }
-
 	}
 
 	/**

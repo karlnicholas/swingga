@@ -54,4 +54,15 @@ public class CritterRandomMovement implements CritterMovement {
 		}
 		return movement;
 	}
+
+	@Override
+	public int getEnergy() {
+		return 0;
+	}
+
+	@Override
+	public void setEnergy(int energy) {
+		// TODO Auto-generated method stub
+		
+	}
 }

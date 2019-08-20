@@ -12,10 +12,11 @@ import java.util.Random;
 public class CritterTuringMovement implements CritterMovement {
 	private static final Random rand = new Random();
 	private List<TuringMotion> motions = new ArrayList<>();
-	private static final int motionMax = 10;
+	private static final int motionMax = 500;
 	// memory of last motion amount
 	private int mx, my;
 	private int turingLocation;
+	private int energy = 1000; 
 
 	public CritterTuringMovement() {
 		int mCount = rand.nextInt(motionMax-1) + 1;
@@ -32,29 +33,53 @@ public class CritterTuringMovement implements CritterMovement {
 
 	@Override
 	public void moveCritter(Critter c) {
-		mx += motions.get(turingLocation).getxAdjust();
-		my += motions.get(turingLocation).getyAdjust();
-		c.x = Math.min(990, Math.max(10, c.x + mx));
-		c.y = Math.min(990, Math.max(10, c.y + my));
+		int xm = motions.get(turingLocation).getxAdjust();
+		mx = Math.max(-10, Math.min(10, xm ));  
+		int ym = motions.get(turingLocation).getyAdjust();
+		my = Math.max(-10, Math.min(10, ym ));  
+		
+		energy -= Math.max( Math.abs(mx)*2 + Math.abs(my)*2, 1);
+//		energy -= Math.min((Math.abs(mx) + Math.abs(my)), 4);
+		c.x = c.x + mx;
+		c.y = c.y + my;
+		c.checkBounds();
+/*		
+		c.x = Math.max(0, Math.min(1000, c.x + mx));
+		c.y = Math.max(0, Math.min(1000, c.y + my));
+*/		
 		turingLocation = motions.get(turingLocation).getGotoLocation();
 	}
+	
 	
 	@Override
 	public CritterMovement cloneAndMutate() {
 		CritterTuringMovement movement = new CritterTuringMovement(this);
-		TuringMotion motion = movement.motions.get( rand.nextInt(motions.size()) );
-		switch(rand.nextInt(3)) {
+		int mLoc = rand.nextInt(motions.size());
+		TuringMotion motion = movement.motions.get( mLoc );
+		switch(rand.nextInt(4)) {
 		case 0:
-			motion.setxAdjust(motion.getxAdjust() + (2 - rand.nextInt(5)));
+			motion.setxAdjust(8 - rand.nextInt(17));
 			break;
 		case 1:
-			motion.setyAdjust(motion.getyAdjust() + (2 - rand.nextInt(5)));
+			motion.setyAdjust(8 - rand.nextInt(17));
 			break;
 		case 2:
 			motion.setGotoLocation(motion.getGotoLocation() + (2 - rand.nextInt(5)));
 			motion.setGotoLocation( Math.max(0, Math.min(motions.size()-1, motion.getGotoLocation()) ) );
 			break;
+		case 3:
+			break;
 		}
 		return movement;
+	}
+
+	@Override
+	public int getEnergy() {
+		return energy;
+	}
+
+	@Override
+	public void setEnergy(int energy) {
+		this.energy = energy;
 	}
 }
