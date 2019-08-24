@@ -1,5 +1,6 @@
 package swingga;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,11 +15,12 @@ public class CritterTuringMovement implements CritterMovement {
 	private List<TuringMotion> motions = new ArrayList<>();
 	private static final int motionMax = 500;
 	// memory of last motion amount
-	private int mx, my;
+	private Offset offset;
 	private int turingLocation;
-	private int energy = 1000; 
+	private int energy = 1000;
 
 	public CritterTuringMovement() {
+		offset = new Offset();
 		int mCount = rand.nextInt(motionMax-1) + 1;
 		for(int i=mCount; i>0; --i) {
 			motions.add( new TuringMotion(rand, mCount));
@@ -26,28 +28,27 @@ public class CritterTuringMovement implements CritterMovement {
 	}
 
 	public CritterTuringMovement(CritterTuringMovement critterTuringMovement) {
+		offset = new Offset();
 		for(int i=0; i < critterTuringMovement.motions.size(); ++i) {
 			motions.add( new TuringMotion(critterTuringMovement.motions.get(i)));
 		}
 	}
 
 	@Override
-	public void moveCritter(Critter c) {
+	public Offset getMovement(Critter c) {
 		int xm = motions.get(turingLocation).getxAdjust();
-		mx = Math.max(-10, Math.min(10, xm ));  
+		offset.mx = Math.max(-10, Math.min(10, xm ));  
 		int ym = motions.get(turingLocation).getyAdjust();
-		my = Math.max(-10, Math.min(10, ym ));  
+		offset.my = Math.max(-10, Math.min(10, ym ));  
 		
-		energy -= Math.max( Math.abs(mx)*2 + Math.abs(my)*2, 1);
+		energy -= Math.max( Math.abs(offset.mx)*2 + Math.abs(offset.my)*2, 1);
 //		energy -= Math.min((Math.abs(mx) + Math.abs(my)), 4);
-		c.x = c.x + mx;
-		c.y = c.y + my;
-		c.checkBounds();
 /*		
 		c.x = Math.max(0, Math.min(1000, c.x + mx));
 		c.y = Math.max(0, Math.min(1000, c.y + my));
 */		
 		turingLocation = motions.get(turingLocation).getGotoLocation();
+		return offset; 
 	}
 	
 	
@@ -74,6 +75,11 @@ public class CritterTuringMovement implements CritterMovement {
 	}
 
 	@Override
+	public boolean checkEnergy() {
+		return energy > 0;
+	}
+
+	@Override
 	public int getEnergy() {
 		return energy;
 	}
@@ -82,4 +88,5 @@ public class CritterTuringMovement implements CritterMovement {
 	public void setEnergy(int energy) {
 		this.energy = energy;
 	}
+
 }

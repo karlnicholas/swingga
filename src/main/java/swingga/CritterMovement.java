@@ -6,9 +6,10 @@ package swingga;
  */
 public interface CritterMovement {
 
-	public void moveCritter(Critter c);
+	public Offset getMovement(Critter c);
 	public int getEnergy();
 	public void setEnergy(int energy);
+	public boolean checkEnergy();
 
 	public CritterMovement cloneAndMutate();
 

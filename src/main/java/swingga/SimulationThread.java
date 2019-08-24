@@ -2,11 +2,9 @@ package swingga;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import swingga.SwingGa.MyPanel;
@@ -22,17 +20,19 @@ public class SimulationThread implements Runnable {
 	public final static int cSize = 10;
 	public boolean run = true;
 	private int counter = 0;
-	private MyPanel myPanel; 
+	private MyPanel myPanel;
+	private Offset randomJumpOffset;
 	public SimulationThread(MyPanel myPanel) {
 		this.myPanel = myPanel;
+		randomJumpOffset = new Offset();
 		screenItems = new ScreenItems();
 		screenItems.critters = new ArrayList<>();
 		screenItems.foodStuffs = new ArrayList<>();
 		for ( int i = 0; i < 100; ++i ) {
 			screenItems.critters.add(new Critter(
-					cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
-					new CritterTuringMovement() 
-					));
+				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
+				new CritterTuringMovement() 
+				));
 		}
 	}
 	@Override
@@ -52,56 +52,25 @@ public class SimulationThread implements Runnable {
 	    		Critter c = null;
 		    	while ( cit.hasNext() ) {
 		    		c = cit.next();
-					c.move();
-					if ( c.getMovement().getEnergy() < 0 ) {
+					c.move(c.getMovement().getMovement(c));
+					if ( !c.getMovement().checkEnergy() ) {
 						cit.remove();
 						continue;
 					}
-					// check for food found, add to 
-		    		Rectangle r1 = new Rectangle(c.x, c.y, cSize, cSize);
-					Iterator<Food> fit = screenItems.foodStuffs.iterator();
-		    		while ( fit.hasNext() ) {
-		    			Food f = fit.next();
-			    		Rectangle r2 = new Rectangle(f.x, f.y, cSize, cSize);
-			    		if ( r1.intersects(r2) ) {
-			    			int newE = c.getMovement().getEnergy() + 1000;
-			    			if (newE > 10000) newE = 10000;
-			    			c.getMovement().setEnergy(newE);
-			    			fit.remove();
-			    			break;
-			    		}
-			    	}
-
+					checkFoodFound(c);
 					// check for collisions, remove from list
-		    		r1 = new Rectangle(c.x, c.y, cSize, cSize);
 			    	for ( Critter c2: screenItems.critters ) {
 			    		if ( c == c2) continue;
-			    		Rectangle r2 = new Rectangle(c2.x, c2.y, cSize, cSize);
-			    		if ( r1.intersects(r2) ) {
-			    			int e1 = c.getMovement().getEnergy();
-			    			int e2 = c2.getMovement().getEnergy();
-			    			if ( e1 > e2 ) {
-	//		    				cit.remove();
-			    				c2.x = c2.x + (20 - rand.nextInt(41));
-			    				c2.y = c2.y + (20 - rand.nextInt(41));
-			    				c2.checkBounds();
-			    				c2.getMovement().setEnergy( c2.getMovement().getEnergy() - 40);
-			    			} else if ( e2 > e1 ) {
-			    				c.x = c.x + (20 - rand.nextInt(41));
-			    				c.y = c.y + (20 - rand.nextInt(41));
-			    				c.checkBounds();
-			    				c.getMovement().setEnergy( c.getMovement().getEnergy() - 40);
-			    			}
+			    		if ( c.intersects(c2.rectangle) ) {
+			    			handleCollision(c, c2);
 			    			break;
 			    		}
 			    	}
-			    	
 				}
 		    	if ( screenItems.critters.size() == 0 ) {
 		    		c.getMovement().setEnergy(100);
 		    		screenItems.critters.add(c);
 		    	}
-				myPanel.repaint();
 				if ( counter % 10 == 0 ) {
 	//				printAverages();
 					reproduceAndMutate();
@@ -109,8 +78,43 @@ public class SimulationThread implements Runnable {
 				if ( counter % 10 == 0 ) {
 					dropFood();
 				}
+				myPanel.repaint();
 			}
 		}
+	}
+	
+	Offset getRandomJump() {
+		randomJumpOffset.mx = (20 - rand.nextInt(41));
+		randomJumpOffset.my = (20 - rand.nextInt(41));
+		return randomJumpOffset;
+	}
+	
+	private void handleCollision(Critter c, Critter c2) {
+		int e1 = c.getMovement().getEnergy();
+		int e2 = c2.getMovement().getEnergy();
+		if ( e1 > e2 ) {
+//		    				cit.remove();
+			c2.move(getRandomJump());
+			c2.getMovement().setEnergy( c2.getMovement().getEnergy() - 40);
+		} else if ( e2 > e1 ) {
+			c.move(getRandomJump());
+			c.getMovement().setEnergy( c.getMovement().getEnergy() - 40);
+		}
+	}
+	private void checkFoodFound(Critter c) {
+		// check for food found, add to 
+		Iterator<Food> fit = screenItems.foodStuffs.iterator();
+		while ( fit.hasNext() ) {
+			Food f = fit.next();
+    		if ( c.intersects(f.rectangle) ) {
+    			int newE = c.getMovement().getEnergy() + 1000;
+    			if (newE > 10000) newE = 10000;
+    			c.getMovement().setEnergy(newE);
+    			fit.remove();
+    			break;
+    		}
+    	}
+		
 	}
 	
 	private void dropFood() {
@@ -164,34 +168,6 @@ public class SimulationThread implements Runnable {
 */		
 	}
 
-	private void printAverages() {
-		int cSize = screenItems.critters.size();
-		int xRandMax = 0; 
-		int yRandMax = 0;
-		int xRandOff = 0;
-		int yRandOff = 0;
-		int xRandLimit = 0;
-		int yRandLimit = 0;
-		for ( int i = 0 ; i < cSize; ++i) {
-			Critter cr = screenItems.critters.get(i);
-			CritterRandomMovement m = (CritterRandomMovement) cr.getMovement(); 
-			xRandMax += m.xRandMax; 
-			yRandMax += m.yRandMax;
-			xRandOff += m.xRandOff;
-			yRandOff += m.yRandOff;
-			xRandLimit += m.xRandLimit;
-			yRandLimit += m.yRandLimit;
-		}
-		
-		System.out.println(
-		xRandMax / cSize +":" +  
-		yRandMax / cSize +":" + 
-		xRandOff / cSize +":" + 
-		yRandOff / cSize +":" + 
-		xRandLimit / cSize +":" + 
-		yRandLimit / cSize 
-		);
-	}
 	public void drawScreenItems(Graphics2D g2d) {
 		synchronized( screenItems ) {
 			g2d.setColor(Color.RED);
