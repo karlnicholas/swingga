@@ -52,21 +52,21 @@ public class SimulationThread implements Runnable {
 	    		Critter c = null;
 		    	while ( cit.hasNext() ) {
 		    		c = cit.next();
-					c.move(c.getMovement().getMovement(c));
-					if ( !c.getMovement().checkEnergy() ) {
-						cit.remove();
-						continue;
-					}
+		    		if ( handleMoveAndCheckDeath(c) ) { 
+		    			cit.remove();
+		    			continue;
+		    		}
 					checkFoodFound(c);
-					// check for collisions, remove from list
+					// check for collisions
 			    	for ( Critter c2: screenItems.critters ) {
 			    		if ( c == c2) continue;
-			    		if ( c.intersects(c2.rectangle) ) {
+			    		if ( c.r.intersects(c2.r) ) {
 			    			handleCollision(c, c2);
 			    			break;
 			    		}
 			    	}
 				}
+		    	// just in case everthing dies
 		    	if ( screenItems.critters.size() == 0 ) {
 		    		c.getMovement().setEnergy(100);
 		    		screenItems.critters.add(c);
@@ -83,7 +83,14 @@ public class SimulationThread implements Runnable {
 		}
 	}
 	
-	Offset getRandomJump() {
+	private boolean handleMoveAndCheckDeath(Critter c) {
+		c.move(c.getMovement().getMovement(c));
+		if ( !c.getMovement().checkEnergy() ) {
+			return true;
+		}
+		return false;
+	}
+	private Offset getRandomJump() {
 		randomJumpOffset.mx = (20 - rand.nextInt(41));
 		randomJumpOffset.my = (20 - rand.nextInt(41));
 		return randomJumpOffset;
@@ -93,7 +100,6 @@ public class SimulationThread implements Runnable {
 		int e1 = c.getMovement().getEnergy();
 		int e2 = c2.getMovement().getEnergy();
 		if ( e1 > e2 ) {
-//		    				cit.remove();
 			c2.move(getRandomJump());
 			c2.getMovement().setEnergy( c2.getMovement().getEnergy() - 40);
 		} else if ( e2 > e1 ) {
@@ -106,7 +112,7 @@ public class SimulationThread implements Runnable {
 		Iterator<Food> fit = screenItems.foodStuffs.iterator();
 		while ( fit.hasNext() ) {
 			Food f = fit.next();
-    		if ( c.intersects(f.rectangle) ) {
+    		if ( c.r.intersects(f.r) ) {
     			int newE = c.getMovement().getEnergy() + 1000;
     			if (newE > 10000) newE = 10000;
     			c.getMovement().setEnergy(newE);
@@ -140,8 +146,8 @@ public class SimulationThread implements Runnable {
 			if ( cr.getMovement().getEnergy() > 200 ) {
 	//			Critter cn = new Critter(cr.x,  cr.y, cr.getMovement().cloneAndMutate());
 				Critter cn = new Critter(
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.x)), 
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.y)), 
+						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
+						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
 						cr.getMovement().cloneAndMutate());
 	//			Critter cn = new Critter(rand.nextInt(1000), rand.nextInt(1000),  cr.getMovement().cloneAndMutate());
 				cn.getMovement().setEnergy(cr.getMovement().getEnergy() / 2);
@@ -171,9 +177,9 @@ public class SimulationThread implements Runnable {
 	public void drawScreenItems(Graphics2D g2d) {
 		synchronized( screenItems ) {
 			g2d.setColor(Color.RED);
-			screenItems.critters.forEach(c->g2d.fillOval(c.x, c.y, cSize, cSize));	    		
+			screenItems.critters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
 			g2d.setColor(Color.GREEN);
-			screenItems.foodStuffs.forEach(f->g2d.fillOval(f.x, f.y, cSize, cSize));
+			screenItems.foodStuffs.forEach(f->g2d.fillOval(f.r.x, f.r.y, cSize, cSize));
 		}
 	}
 }
