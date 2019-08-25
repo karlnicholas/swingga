@@ -16,7 +16,6 @@ public class CritterTuringMovement implements CritterMovement {
 	// memory of last motion amount
 	private Offset offset;
 	private int turingLocation;
-	private int energy = 1000;
 
 	public CritterTuringMovement() {
 		offset = new Offset();
@@ -40,7 +39,6 @@ public class CritterTuringMovement implements CritterMovement {
 		int ym = motions.get(turingLocation).getyAdjust();
 		offset.my = Math.max(-10, Math.min(10, ym ));  
 		
-		energy -= Math.max( Math.abs(offset.mx)*2 + Math.abs(offset.my)*2, 1);
 //		energy -= Math.min((Math.abs(mx) + Math.abs(my)), 4);
 /*		
 		c.x = Math.max(0, Math.min(1000, c.x + mx));
@@ -71,21 +69,6 @@ public class CritterTuringMovement implements CritterMovement {
 			break;
 		}
 		return movement;
-	}
-
-	@Override
-	public boolean checkEnergy() {
-		return energy > 0;
-	}
-
-	@Override
-	public int getEnergy() {
-		return energy;
-	}
-
-	@Override
-	public void setEnergy(int energy) {
-		this.energy = energy;
 	}
 
 }

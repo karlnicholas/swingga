@@ -57,18 +57,10 @@ public class SimulationThread implements Runnable {
 		    			continue;
 		    		}
 					checkFoodFound(c);
-					// check for collisions
-			    	for ( Critter c2: screenItems.critters ) {
-			    		if ( c == c2) continue;
-			    		if ( c.r.intersects(c2.r) ) {
-			    			handleCollision(c, c2);
-			    			break;
-			    		}
-			    	}
 				}
 		    	// just in case everthing dies
 		    	if ( screenItems.critters.size() == 0 ) {
-		    		c.getMovement().setEnergy(100);
+		    		c.energy = 100;
 		    		screenItems.critters.add(c);
 		    	}
 				if ( counter % 10 == 0 ) {
@@ -84,27 +76,45 @@ public class SimulationThread implements Runnable {
 	}
 	
 	private boolean handleMoveAndCheckDeath(Critter c) {
-		c.move(c.getMovement().getMovement(c));
-		if ( !c.getMovement().checkEnergy() ) {
+		Offset offset = c.getMovement().getMovement(c);
+		c.move(offset);
+
+		// check for collisions
+    	for ( Critter c2: screenItems.critters ) {
+    		if ( c == c2) continue;
+    		if ( c.r.intersects(c2.r) ) {
+    			handleCollision(c, c2, offset);
+    			break;
+    		}
+    	}
+		assessMovementCost(c, offset);
+		if ( c.energy <= 0  ) {
 			return true;
 		}
 		return false;
 	}
+	
+	
+	private void assessMovementCost(Critter c, Offset offset) {
+		c.energy -= Math.max( Math.abs(offset.mx) + Math.abs(offset.my), (counter%3==0?1:0));
+	}
+	
 	private Offset getRandomJump() {
-		randomJumpOffset.mx = (20 - rand.nextInt(41));
-		randomJumpOffset.my = (20 - rand.nextInt(41));
+		randomJumpOffset.mx = (10 - rand.nextInt(21));
+		randomJumpOffset.my = (10 - rand.nextInt(21));
 		return randomJumpOffset;
 	}
 	
-	private void handleCollision(Critter c, Critter c2) {
-		int e1 = c.getMovement().getEnergy();
-		int e2 = c2.getMovement().getEnergy();
-		if ( e1 > e2 ) {
+	private void handleCollision(Critter c, Critter c2, Offset offset) {
+		if ( c.energy > c2.energy ) {
 			c2.move(getRandomJump());
-			c2.getMovement().setEnergy( c2.getMovement().getEnergy() - 40);
-		} else if ( e2 > e1 ) {
-			c.move(getRandomJump());
-			c.getMovement().setEnergy( c.getMovement().getEnergy() - 40);
+			c2.energy -= 40;
+		} else if ( c2.energy > c.energy ) {
+			offset.mx = 0 - offset.mx; 
+			offset.my = 0 - offset.my; 
+			c.move(offset);
+			offset.mx = 0; 
+			offset.my = 0; 
 		}
 	}
 	private void checkFoodFound(Critter c) {
@@ -113,9 +123,9 @@ public class SimulationThread implements Runnable {
 		while ( fit.hasNext() ) {
 			Food f = fit.next();
     		if ( c.r.intersects(f.r) ) {
-    			int newE = c.getMovement().getEnergy() + 1000;
+    			int newE = c.energy + 1000;
     			if (newE > 10000) newE = 10000;
-    			c.getMovement().setEnergy(newE);
+    			c.energy = newE;
     			fit.remove();
     			break;
     		}
@@ -139,18 +149,18 @@ public class SimulationThread implements Runnable {
 	}
 	private void reproduceAndMutate() {
 		// genetic reproduction callback code
-		Collections.sort(screenItems.critters, (c1, c2)-> {return c2.getMovement().getEnergy() - c1.getMovement().getEnergy();} );
+		Collections.sort(screenItems.critters, (c1, c2)-> {return c2.energy - c1.energy;} );
 		int cSize = screenItems.critters.size();
 		for ( int i = 100 - cSize; i > 0; --i) {
 			Critter cr = screenItems.critters.get(rand.nextInt(Math.min(10, cSize)));
-			if ( cr.getMovement().getEnergy() > 200 ) {
+			if ( cr.energy > 200 ) {
 	//			Critter cn = new Critter(cr.x,  cr.y, cr.getMovement().cloneAndMutate());
 				Critter cn = new Critter(
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
 						cr.getMovement().cloneAndMutate());
 	//			Critter cn = new Critter(rand.nextInt(1000), rand.nextInt(1000),  cr.getMovement().cloneAndMutate());
-				cn.getMovement().setEnergy(cr.getMovement().getEnergy() / 2);
+				cn.energy = cr.energy / 2;
 //				cr.getMovement().setEnergy(cr.getMovement().getEnergy() - cr.getMovement().getEnergy() / 4);
 				screenItems.critters.add(cn);
 			}

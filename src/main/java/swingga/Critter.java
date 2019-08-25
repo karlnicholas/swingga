@@ -6,6 +6,8 @@ public class Critter {
 	// movement algorithm
 	private CritterMovement movement;
 	public Rectangle r; 
+	public int energy = 1000;
+
 
 	public Critter(int x, int y, CritterMovement movement) {
 		this.movement = movement;
