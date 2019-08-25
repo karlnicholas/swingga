@@ -7,11 +7,13 @@ public class Critter {
 	private CritterMovement movement;
 	public Rectangle r; 
 	public int energy = 1000;
+	public boolean living;
 
 
 	public Critter(int x, int y, CritterMovement movement) {
 		this.movement = movement;
 		r = new Rectangle(x, y, SimulationThread.cSize, SimulationThread.cSize);
+		living = true;
 	}
 	
 	@Override
