@@ -54,7 +54,7 @@ public class CritterTuringMovement implements CritterMovement {
 		CritterTuringMovement movement = new CritterTuringMovement(this);
 		int mLoc = rand.nextInt(motions.size());
 		TuringMotion motion = movement.motions.get( mLoc );
-		switch(rand.nextInt(4)) {
+		switch(rand.nextInt(5)) {
 		case 0:
 			motion.setxAdjust(8 - rand.nextInt(17));
 			break;
@@ -63,9 +63,27 @@ public class CritterTuringMovement implements CritterMovement {
 			break;
 		case 2:
 			motion.setGotoLocation(motion.getGotoLocation() + (2 - rand.nextInt(5)));
-			motion.setGotoLocation( Math.max(0, Math.min(motions.size()-1, motion.getGotoLocation()) ) );
+			motion.setGotoLocation( Math.max(0, Math.min(movement.motions.size()-1, motion.getGotoLocation()) ) );
 			break;
 		case 3:
+			break;
+		case 4:
+			int mCount = rand.nextInt(motionMax-1) + 1;
+			if ( movement.motions.size() > mCount ) {
+				
+				for ( int i=movement.motions.size(); i > mCount; --i) {
+					movement.motions.remove(i-1);
+				}
+				for ( int i=0; i < movement.motions.size(); ++i) {
+					if ( movement.motions.get(i).getGotoLocation() >= mCount )
+						movement.motions.get(i).setGotoLocation(rand.nextInt(mCount));
+				}
+				
+			} else {
+				for ( int i=movement.motions.size(); i < mCount; ++i) {
+					movement.motions.add( new TuringMotion(rand, mCount));
+				}
+			}
 			break;
 		}
 		return movement;
