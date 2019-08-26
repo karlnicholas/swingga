@@ -9,6 +9,6 @@
 
 ## Critters reproduce when enough energy
 
-## New Life is Cloned and Mutated
+## New Life is Cloned and maybe Mutated
 
 Github Repo: [https://github.com/karlnicholas/swingga](https://github.com/karlnicholas/swingga)

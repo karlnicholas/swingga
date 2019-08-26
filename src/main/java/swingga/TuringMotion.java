@@ -6,8 +6,8 @@ public class TuringMotion {
 	private int xAdjust, yAdjust;
 	private int gotoLocation;
 	public TuringMotion(Random rand, int mCount) {
-		setxAdjust(8 - rand.nextInt(17));
-		setyAdjust(8 - rand.nextInt(17));
+		setxAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
+		setyAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
 		gotoLocation = rand.nextInt(mCount);
 	}
 	public TuringMotion(TuringMotion turingMotion) {

@@ -21,6 +21,8 @@ public class SimulationThread implements Runnable {
 	public final static int cSize = 10;
 	public final static int huntChance = 10;
 	public final static int MAX_CRITTERS = 500;
+	public static enum COLLISION_TYPE {GATHER, HUNTER}
+	public static final int MAX_MOVEMENT = 10;
 	public boolean run = true;
 	private int counter = 0;
 	private MyPanel myPanel;
@@ -167,19 +169,19 @@ public class SimulationThread implements Runnable {
 	}
 	
 	private boolean handleGatheringCritterMoveAndCheckDeath(Critter c) {
-		Offset offset = c.getMovement().getMovement(c);
+		Offset offset = c.getMovement().getOffset();
 		c.move(offset);
+		assessMovementCost(c, offset);
 
 		// check for collisions
 		for( Critter c2: screenItems.gatheringCritters ) {
 			if ( c2.living == false ) continue;
     		if ( c == c2) continue;
     		if ( c.r.intersects(c2.r) ) {
-    			handleFoodCritterCollision(c, c2, offset);
+    			handleFoodCritterCollision(c, c2);
     			break;
     		}
     	}
-		assessMovementCost(c, offset);
 		if ( c.energy <= 0  ) {
 			return true;
 		}
@@ -187,7 +189,7 @@ public class SimulationThread implements Runnable {
 	}
 	
 	private boolean handleHunterCritterMoveAndCheckDeath(Critter c) {
-		Offset offset = c.getMovement().getMovement(c);
+		Offset offset = c.getMovement().getOffset();
 		c.move(offset);
 
 		// check for collisions
@@ -225,38 +227,53 @@ public class SimulationThread implements Runnable {
 		return randomJumpOffset;
 	}
 	
-	private void handleFoodCritterCollision(Critter c, Critter c2, Offset offset) {
+	private void handleFoodCritterCollision(Critter c, Critter c2) {
 		if ( c.energy > c2.energy ) {
-			c2.move(getRandomJump());
-			c2.energy -= 40;
+			Offset jOffset = c2.getMovement().getCollision(COLLISION_TYPE.GATHER);
+			c2.move(jOffset);
+			assessMovementCost(c2, jOffset);
 		} else if ( c2.energy > c.energy ) {
+			Offset jOffset = c.getMovement().getCollision(COLLISION_TYPE.GATHER);
+			c.move(jOffset);
+			assessMovementCost(c, jOffset);
+/*
 			offset.mx = 0 - offset.mx; 
 			offset.my = 0 - offset.my; 
 			c.move(offset);
 			offset.mx = 0; 
-			offset.my = 0; 
+			offset.my = 0;
+*/			 
 		}
 	}
 	private void handleHunterCritterFoodCollision(Critter c, Critter c2, Offset offset) {
+		Offset jOffset = c.getMovement().getCollision(COLLISION_TYPE.GATHER);
+		c.move(jOffset);
+		assessMovementCost(c, jOffset);
 		if ( rand.nextInt(huntChance) == 0 ) {
 			c.energy += c2.energy;
 			if ( c.energy > 10000)
 				c.energy = 10000;
 			c2.living = false;
 		} else {
-			c2.move(getRandomJump());
-			c2.energy -= 40;
+			jOffset = c2.getMovement().getCollision(COLLISION_TYPE.HUNTER);
+			c2.move(jOffset);
+			assessMovementCost(c2, jOffset);
 		}
 	}
 	private void handleHunterCritterHunterCollision(Critter c, Critter c2, Offset offset) {
+		Offset jOffset = c.getMovement().getCollision(COLLISION_TYPE.HUNTER);
+		c.move(jOffset);
+		assessMovementCost(c, jOffset);
 		if ( c.energy > c2.energy && rand.nextInt(huntChance) == 0 ) {
 			c.energy += c2.energy;
 			if ( c.energy > 10000)
 				c.energy = 10000;
 			c2.living = false;
-		} else {
-			c2.move(getRandomJump());
-			c2.energy -= 40;
+			assessMovementCost(c, jOffset);
+		} else {			
+			jOffset = c2.getMovement().getCollision(COLLISION_TYPE.HUNTER);
+			c2.move(jOffset);
+			assessMovementCost(c2, jOffset);
 		}
 	}
 	private void checkFoodFound(Critter c) {
