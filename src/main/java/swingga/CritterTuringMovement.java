@@ -39,11 +39,6 @@ public class CritterTuringMovement implements CritterMovement {
 		int ym = motions.get(turingLocation).getyAdjust();
 		offset.my = Math.max(-10, Math.min(10, ym ));  
 		
-//		energy -= Math.min((Math.abs(mx) + Math.abs(my)), 4);
-/*		
-		c.x = Math.max(0, Math.min(1000, c.x + mx));
-		c.y = Math.max(0, Math.min(1000, c.y + my));
-*/		
 		turingLocation = motions.get(turingLocation).getGotoLocation();
 		return offset; 
 	}

@@ -3,8 +3,8 @@ package swingga;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import swingga.SwingGa.MyPanel;
@@ -19,6 +19,8 @@ public class SimulationThread implements Runnable {
 	private static final Random rand = new Random();
 	public final static int cSize = 10;
 	public final static int huntChance = 10;
+	public final static int GATHERING_REPRODUCTION_THRESHOLD = 5000;
+	public final static int HUNTER_REPRODUCTION_THRESHOLD = 5000;
 	public boolean run = true;
 	private int counter = 0;
 	private MyPanel myPanel;
@@ -27,11 +29,11 @@ public class SimulationThread implements Runnable {
 		this.myPanel = myPanel;
 		randomJumpOffset = new Offset();
 		screenItems = new ScreenItems();
-		screenItems.foodCritters = new ArrayList<>();
+		screenItems.gatheringCritters = new ArrayList<>();
 		screenItems.hunterCritters = new ArrayList<>();
 		screenItems.foodStuffs = new ArrayList<>();
 		for ( int i = 0; i < 50; ++i ) {
-			screenItems.foodCritters.add(new Critter(
+			screenItems.gatheringCritters.add(new Critter(
 				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
 				new CritterTuringMovement()
 				));
@@ -43,6 +45,9 @@ public class SimulationThread implements Runnable {
 				));
 		}
 	}
+	/**
+	 * Main loop of critter thread. Does one "step" in critter lifecycle and calls repaint screen.
+	 */
 	@Override
 	public void run() {
 		while(run) {
@@ -55,62 +60,11 @@ public class SimulationThread implements Runnable {
 			counter++;
 			synchronized( screenItems ) {
 	
-				// move everything
-				Iterator<Critter> cit = screenItems.foodCritters.iterator();
-	    		Critter c = null;
-		    	while ( cit.hasNext() ) {
-		    		c = cit.next();
-		    		if ( handleFoodCritterMoveAndCheckDeath(c) ) { 
-		    			c.living = false;
-		    			continue;
-		    		}
-	    			checkFoodFound(c);
-				}
-				// check still living
-				cit = screenItems.foodCritters.iterator();
-	    		c = null;
-		    	while ( cit.hasNext() ) {
-		    		c = cit.next();
-		    		if ( c.living == false)
-		    			cit.remove();
-		    	}
-		    	// just in case everything dies
-		    	if ( screenItems.foodCritters.size() == 0 ) {
-		    		c.energy = 100;
-		    		c.living = true;
-		    		screenItems.foodCritters.add(c);
-		    	}
+				
+				stepGatheringCritters();
 
-				// move everything
-				cit = screenItems.hunterCritters.iterator();
-	    		c = null;
-		    	while ( cit.hasNext() ) {
-		    		c = cit.next();
-		    		if ( handleHunterCritterMoveAndCheckDeath(c) ) { 
-		    			c.living = false;
-		    			continue;
-		    		}
-				}
-				// check still living
-				cit = screenItems.hunterCritters.iterator();
-	    		c = null;
-		    	while ( cit.hasNext() ) {
-		    		c = cit.next();
-		    		if ( c.living == false)
-		    			cit.remove();
-		    	}
-		    	// just in case everything dies
-		    	if ( screenItems.hunterCritters.size() == 0 ) {
-		    		c.energy = 100;
-		    		c.living = true;
-		    		screenItems.hunterCritters.add(c);
-		    	}
+				stepHunterCritters();
 
-		    	if ( counter % 10 == 0 ) {
-	//				printAverages();
-					reproduceAndMutateFoodCritters();
-					reproduceAndMutateHunterCritters();
-				}
 				if ( counter % 10 == 0 ) {
 					dropFood();
 				}
@@ -118,13 +72,82 @@ public class SimulationThread implements Runnable {
 			}
 		}
 	}
+	private void stepHunterCritters() {
+		// move everything
+		Iterator<Critter> cit = screenItems.hunterCritters.iterator();
+		Critter c = null;
+		while ( cit.hasNext() ) {
+			c = cit.next();
+			if ( handleHunterCritterMoveAndCheckDeath(c) ) { 
+				c.living = false;
+				continue;
+			}
+		}
+		// check still living
+		cit = screenItems.hunterCritters.iterator();
+		c = null;
+		while ( cit.hasNext() ) {
+			c = cit.next();
+			if ( c.living == false)
+				cit.remove();
+		}
+		// check if reproducing
+		List<Critter> babies = new ArrayList<>();
+		for ( Critter cr: screenItems.hunterCritters) {
+			if ( cr.energy > HUNTER_REPRODUCTION_THRESHOLD ) {
+				babies.add( reproduceAndMutateHunterCritter(cr) );
+			}
+		}
+		screenItems.hunterCritters.addAll(babies);
+		// just in case everything dies
+		if ( screenItems.hunterCritters.size() == 0 ) {
+			c.energy = 100;
+			c.living = true;
+			screenItems.hunterCritters.add(c);
+		}
+	}
+	private void stepGatheringCritters() {
+		// move gathering critters
+		Iterator<Critter> cit = screenItems.gatheringCritters.iterator();
+		Critter c = null;
+		while ( cit.hasNext() ) {
+			c = cit.next();
+			if ( handleGatheringCritterMoveAndCheckDeath(c) ) { 
+				c.living = false;
+				continue;
+			}
+			checkFoodFound(c);
+		}
+		// check still living
+		cit = screenItems.gatheringCritters.iterator();
+		c = null;
+		while ( cit.hasNext() ) {
+			c = cit.next();
+			if ( c.living == false)
+				cit.remove();
+		}
+		// check if reproducing
+		List<Critter> babies = new ArrayList<>();
+		for ( Critter cr: screenItems.gatheringCritters) {
+			if ( cr.energy > GATHERING_REPRODUCTION_THRESHOLD ) {
+				babies.add( reproduceAndMutateGatheringCritter(cr) );
+			}
+		}
+		screenItems.gatheringCritters.addAll(babies);
+		// just in case everything dies
+		if ( screenItems.gatheringCritters.size() == 0 ) {
+			c.energy = 100;
+			c.living = true;
+			screenItems.gatheringCritters.add(c);
+		}
+	}
 	
-	private boolean handleFoodCritterMoveAndCheckDeath(Critter c) {
+	private boolean handleGatheringCritterMoveAndCheckDeath(Critter c) {
 		Offset offset = c.getMovement().getMovement(c);
 		c.move(offset);
 
 		// check for collisions
-		for( Critter c2: screenItems.foodCritters ) {
+		for( Critter c2: screenItems.gatheringCritters ) {
 			if ( c2.living == false ) continue;
     		if ( c == c2) continue;
     		if ( c.r.intersects(c2.r) ) {
@@ -144,7 +167,7 @@ public class SimulationThread implements Runnable {
 		c.move(offset);
 
 		// check for collisions
-		for( Critter c2: screenItems.foodCritters ) {
+		for( Critter c2: screenItems.gatheringCritters ) {
 			if ( c2.living == false ) continue;
     		if ( c == c2) continue;
     		if ( c.r.intersects(c2.r) ) {
@@ -225,7 +248,6 @@ public class SimulationThread implements Runnable {
     			break;
     		}
     	}
-		
 	}
 	
 	private void dropFood() {
@@ -242,22 +264,31 @@ public class SimulationThread implements Runnable {
 			screenItems.foodStuffs.add(new Food(rand));
 		}
 	}
+	private Critter reproduceAndMutateGatheringCritter(Critter c) {
+		// genetic reproduction callback code
+		Critter cn = new Critter(
+				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
+				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
+				c.getMovement().cloneAndMutate());
+		cn.energy = c.energy / 2;
+		c.energy /= 2;
+		return cn;
+	}
+/*	
 	private void reproduceAndMutateFoodCritters() {
 		// genetic reproduction callback code
-		Collections.sort(screenItems.foodCritters, (c1, c2)-> {return c2.energy - c1.energy;} );
-		int cSize = screenItems.foodCritters.size();
+		Collections.sort(screenItems.gatheringCritters, (c1, c2)-> {return c2.energy - c1.energy;} );
+		int cSize = screenItems.gatheringCritters.size();
 		for ( int i = 50 - cSize; i > 0; --i) {
-			Critter cr = screenItems.foodCritters.get(rand.nextInt(Math.min(10, cSize)));
+			Critter cr = screenItems.gatheringCritters.get(rand.nextInt(Math.min(10, cSize)));
 			if ( cr.energy > 200 ) {
-	//			Critter cn = new Critter(cr.x,  cr.y, cr.getMovement().cloneAndMutate());
 				Critter cn = new Critter(
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
 						cr.getMovement().cloneAndMutate());
-	//			Critter cn = new Critter(rand.nextInt(1000), rand.nextInt(1000),  cr.getMovement().cloneAndMutate());
 				cn.energy = cr.energy / 2;
-//				cr.getMovement().setEnergy(cr.getMovement().getEnergy() - cr.getMovement().getEnergy() / 4);
-				screenItems.foodCritters.add(cn);
+				cr.energy /= 2;
+				screenItems.gatheringCritters.add(cn);
 			}
 		}
 	}
@@ -268,23 +299,31 @@ public class SimulationThread implements Runnable {
 		for ( int i = 50 - cSize; i > 0; --i) {
 			Critter cr = screenItems.hunterCritters.get(rand.nextInt(Math.min(10, cSize)));
 			if ( cr.energy > 200 ) {
-	//			Critter cn = new Critter(cr.x,  cr.y, cr.getMovement().cloneAndMutate());
 				Critter cn = new Critter(
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
 						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
 						cr.getMovement().cloneAndMutate());
-	//			Critter cn = new Critter(rand.nextInt(1000), rand.nextInt(1000),  cr.getMovement().cloneAndMutate());
 				cn.energy = cr.energy / 2;
-//				cr.getMovement().setEnergy(cr.getMovement().getEnergy() - cr.getMovement().getEnergy() / 4);
 				screenItems.hunterCritters.add(cn);
 			}
 		}
+	}
+*/	
+	private Critter reproduceAndMutateHunterCritter(Critter cr) {
+		// genetic reproduction callback code
+		Critter cn = new Critter(
+				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
+				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
+				cr.getMovement().cloneAndMutate());
+		cn.energy = cr.energy / 2;
+		cr.energy /=  2;
+		return cn;
 	}
 
 	public void drawScreenItems(Graphics2D g2d) {
 		synchronized( screenItems ) {
 			g2d.setColor(Color.BLUE);
-			screenItems.foodCritters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
+			screenItems.gatheringCritters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
 			g2d.setColor(Color.RED);
 			screenItems.hunterCritters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
 			g2d.setColor(Color.GREEN);

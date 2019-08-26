@@ -9,7 +9,6 @@ public class Critter {
 	public int energy = 1000;
 	public boolean living;
 
-
 	public Critter(int x, int y, CritterMovement movement) {
 		this.movement = movement;
 		r = new Rectangle(x, y, SimulationThread.cSize, SimulationThread.cSize);
