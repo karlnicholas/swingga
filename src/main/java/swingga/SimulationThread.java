@@ -3,6 +3,7 @@ package swingga;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -19,7 +20,7 @@ public class SimulationThread implements Runnable {
 	private static final Random rand = new Random();
 	public final static int cSize = 10;
 	public final static int huntChance = 10;
-	public final static int maxCritters = 1000;
+	public final static int MAX_CRITTERS = 500;
 	public boolean run = true;
 	private int counter = 0;
 	private MyPanel myPanel;
@@ -35,16 +36,16 @@ public class SimulationThread implements Runnable {
 			screenItems.gatheringCritters.add(new Critter(
 				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
 				new CritterTuringMovement(), 
-				rand.nextInt(999)+1, 
-				rand.nextInt(99)+1
+				rand.nextInt(7999)+2000, 
+				rand.nextInt(79)+20
 			));
 		}
 		for ( int i = 0; i < 50; ++i ) {
 			screenItems.hunterCritters.add(new Critter(
 				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
 				new CritterTuringMovement(), 
-				rand.nextInt(999)+1, 
-				rand.nextInt(99)+1
+				rand.nextInt(7999)+2000, 
+				rand.nextInt(79)+20
 			));
 		}
 	}
@@ -96,14 +97,20 @@ public class SimulationThread implements Runnable {
 		}
 		// check if reproducing
 		List<Critter> babies = new ArrayList<>();
-		int maxBabies = 1000 - screenItems.hunterCritters.size();
 		for ( Critter cr: screenItems.hunterCritters) {
 			if ( cr.energy > cr.repEnergy ) {
 				babies.add( reproduceAndMutateHunterCritter(cr) );
-				if ( babies.size() > maxBabies ) {
-					break;
-				}
 			}
+		}
+		Collections.shuffle(babies);
+		int maxBabies = MAX_CRITTERS - screenItems.hunterCritters.size();
+		cit = babies.iterator();
+		while ( cit.hasNext() ) {
+			cit.next();
+			if ( maxBabies-- > 0 ) { 
+				continue;
+			}
+			cit.remove();
 		}
 		screenItems.hunterCritters.addAll(babies);
 		// just in case everything dies
@@ -135,14 +142,20 @@ public class SimulationThread implements Runnable {
 		}
 		// check if reproducing
 		List<Critter> babies = new ArrayList<>();
-		int maxBabies = 1000 - screenItems.gatheringCritters.size();
 		for ( Critter cr: screenItems.gatheringCritters) {
 			if ( cr.energy > cr.repEnergy ) {
 				babies.add( reproduceAndMutateGatheringCritter(cr) );
-				if ( babies.size() > maxBabies ) {
-					break;
-				}
 			}
+		}
+		Collections.shuffle(babies);
+		int maxBabies = MAX_CRITTERS - screenItems.gatheringCritters.size();
+		cit = babies.iterator();
+		while ( cit.hasNext() ) {
+			cit.next();
+			if ( maxBabies-- > 0 ) { 
+				continue;
+			}
+			cit.remove();
 		}
 		screenItems.gatheringCritters.addAll(babies);
 		// just in case everything dies
@@ -281,59 +294,25 @@ public class SimulationThread implements Runnable {
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
 				c.getMovement().cloneAndMutate(), 
-				(rand.nextInt( 10 ) == 0 ?  Math.max(1, Math.min(1000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
-				(rand.nextInt( 10 ) == 0 ?  Math.max(1, Math.min(100, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
+				(rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
+				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
 				);
-		cn.energy = (c.energy * 100 ) / c.offspringPercent;
-		c.energy =  c.energy - ((c.energy * 100 ) / c.offspringPercent);
+		// 
+		cn.energy = c.energy / (100 / c.offspringPercent);
+		c.energy =  c.energy - (c.energy / (100 / c.offspringPercent));
 		return cn;
 	}
-/*	
-	private void reproduceAndMutateFoodCritters() {
-		// genetic reproduction callback code
-		Collections.sort(screenItems.gatheringCritters, (c1, c2)-> {return c2.energy - c1.energy;} );
-		int cSize = screenItems.gatheringCritters.size();
-		for ( int i = 50 - cSize; i > 0; --i) {
-			Critter cr = screenItems.gatheringCritters.get(rand.nextInt(Math.min(10, cSize)));
-			if ( cr.energy > 200 ) {
-				Critter cn = new Critter(
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
-						cr.getMovement().cloneAndMutate());
-				cn.energy = cr.energy / 2;
-				cr.energy /= 2;
-				screenItems.gatheringCritters.add(cn);
-			}
-		}
-	}
-	private void reproduceAndMutateHunterCritters() {
-		// genetic reproduction callback code
-		Collections.sort(screenItems.hunterCritters, (c1, c2)-> {return c2.energy - c1.energy;} );
-		int cSize = screenItems.hunterCritters.size();
-		for ( int i = 50 - cSize; i > 0; --i) {
-			Critter cr = screenItems.hunterCritters.get(rand.nextInt(Math.min(10, cSize)));
-			if ( cr.energy > 200 ) {
-				Critter cn = new Critter(
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.x)), 
-						Math.max(0, Math.min(1000, (10-rand.nextInt(21))+cr.r.y)), 
-						cr.getMovement().cloneAndMutate());
-				cn.energy = cr.energy / 2;
-				screenItems.hunterCritters.add(cn);
-			}
-		}
-	}
-*/	
 	private Critter reproduceAndMutateHunterCritter(Critter c) {
 		// genetic reproduction callback code
 		Critter cn = new Critter(
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
 				c.getMovement().cloneAndMutate(), 
-				(rand.nextInt( 10 ) == 0 ?  Math.max(1, Math.min(1000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
-				(rand.nextInt( 10 ) == 0 ?  Math.max(1, Math.min(100, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)
+				(rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
+				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
 			);
-		cn.energy = (c.energy * 100 ) / c.offspringPercent;
-		c.energy =  c.energy - ((c.energy * 100 ) / c.offspringPercent);
+		cn.energy = c.energy / (100 / c.offspringPercent);
+		c.energy =  c.energy - (c.energy / (100 / c.offspringPercent));
 		return cn;
 	}
 
