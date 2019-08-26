@@ -298,8 +298,9 @@ public class SimulationThread implements Runnable {
 				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
 				);
 		// 
-		cn.energy = c.energy / (100 / c.offspringPercent);
-		c.energy =  c.energy - (c.energy / (100 / c.offspringPercent));
+		int eGiven = Math.round(((float)c.energy) / (100.0f / ((float)c.offspringPercent)));
+		cn.energy = eGiven;
+		c.energy =  c.energy - eGiven;
 		return cn;
 	}
 	private Critter reproduceAndMutateHunterCritter(Critter c) {
@@ -311,8 +312,9 @@ public class SimulationThread implements Runnable {
 				(rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
 				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
 			);
-		cn.energy = c.energy / (100 / c.offspringPercent);
-		c.energy =  c.energy - (c.energy / (100 / c.offspringPercent));
+		int eGiven = Math.round(((float)c.energy) / (100.0f / ((float)c.offspringPercent)));
+		cn.energy = eGiven;
+		c.energy =  c.energy - eGiven;
 		return cn;
 	}
 
