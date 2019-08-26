@@ -8,11 +8,15 @@ public class Critter {
 	public Rectangle r; 
 	public int energy = 1000;
 	public boolean living;
+	public int repEnergy;
+	public int offspringPercent;
 
-	public Critter(int x, int y, CritterMovement movement) {
+	public Critter(int x, int y, CritterMovement movement, int repEnergy, int offspringPercent) {
 		this.movement = movement;
 		r = new Rectangle(x, y, SimulationThread.cSize, SimulationThread.cSize);
 		living = true;
+		this.repEnergy = repEnergy;
+		this.offspringPercent = offspringPercent;
 	}
 	
 	@Override
