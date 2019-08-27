@@ -65,7 +65,7 @@ public class CritterTuringMovement implements CritterMovement {
 		CritterTuringMovement movement = new CritterTuringMovement(this);
 		int mLoc = rand.nextInt(motions.size());
 		TuringMotion motion = movement.motions.get( mLoc );
-		switch(rand.nextInt(10)) {
+		switch(rand.nextInt(20)) {
 		case 0:
 			motion.setxAdjust(Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, motion.getxAdjust() + (1-rand.nextInt(3)))));
 			break;
@@ -73,7 +73,7 @@ public class CritterTuringMovement implements CritterMovement {
 			motion.setyAdjust(Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, motion.getyAdjust() + (1-rand.nextInt(3)))));
 			break;
 		case 2:
-			motion.setGotoLocation( rand.nextInt(movement.motions.size()) );
+			motion.setGotoLocation( Math.max(0, Math.min(movement.motions.size(), motion.getGotoLocation() + (1-rand.nextInt(3)))) );
 			break;
 		case 3:
 			int mCount = rand.nextInt(motionMax-1) + 1;
@@ -97,6 +97,14 @@ public class CritterTuringMovement implements CritterMovement {
 			}
 			break;
 		case 4:
+			motion.setxAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
+			break;
+		case 5:
+			motion.setyAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
+			break;
+		case 6:
+			motion.setGotoLocation( rand.nextInt(movement.motions.size()-1) );
+			break;
 		default:
 			break;
 		}

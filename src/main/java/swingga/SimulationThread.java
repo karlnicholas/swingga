@@ -58,7 +58,7 @@ public class SimulationThread implements Runnable {
 	public void run() {
 		while(run) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(75);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -312,12 +312,16 @@ public class SimulationThread implements Runnable {
 	}
 	private Critter reproduceAndMutateGatheringCritter(Critter c) {
 		// genetic reproduction callback code
+		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
+		int op1 = (rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent);  
+		int re2 = rand.nextInt(7999)+2000; 
+		int op2 = rand.nextInt(79)+20;
 		Critter cn = new Critter(
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
 				c.getMovement().cloneAndMutate(), 
-				(rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
-				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
+				(rand.nextBoolean() ? re1 : re2),  
+				(rand.nextBoolean() ? op1 : op2)  
 				);
 		// 
 		int eGiven = Math.round(((float)c.energy) / (100.0f / ((float)c.offspringPercent)));
@@ -327,12 +331,16 @@ public class SimulationThread implements Runnable {
 	}
 	private Critter reproduceAndMutateHunterCritter(Critter c) {
 		// genetic reproduction callback code
+		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
+		int op1 = (rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent);  
+		int re2 = rand.nextInt(7999)+2000; 
+		int op2 = rand.nextInt(79)+20;
 		Critter cn = new Critter(
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
 				c.getMovement().cloneAndMutate(), 
-				(rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy),  
-				(rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent)  
+				(rand.nextBoolean() ? re1 : re2),  
+				(rand.nextBoolean() ? op1 : op2)  
 			);
 		int eGiven = Math.round(((float)c.energy) / (100.0f / ((float)c.offspringPercent)));
 		cn.energy = eGiven;
