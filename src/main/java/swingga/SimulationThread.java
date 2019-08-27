@@ -116,9 +116,10 @@ public class SimulationThread implements Runnable {
 		}
 		screenItems.hunterCritters.addAll(babies);
 		// just in case everything dies
+		// take another generation.
 		if ( screenItems.hunterCritters.size() == 0 ) {
-			c.energy = 100;
-			c.living = true;
+			c = reproduceAndMutateHunterCritter(c);
+			c.energy = 1000;
 			screenItems.hunterCritters.add(c);
 		}
 	}
@@ -161,9 +162,10 @@ public class SimulationThread implements Runnable {
 		}
 		screenItems.gatheringCritters.addAll(babies);
 		// just in case everything dies
+		// take another generation.
 		if ( screenItems.gatheringCritters.size() == 0 ) {
-			c.energy = 100;
-			c.living = true;
+			c = reproduceAndMutateGatheringCritter(c);
+			c.energy = 1000;
 			screenItems.gatheringCritters.add(c);
 		}
 	}
