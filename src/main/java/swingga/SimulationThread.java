@@ -16,7 +16,7 @@ import swingga.SwingGa.MyPanel;
  *
  */
 public class SimulationThread implements Runnable {
-	private ScreenItems screenItems;
+	public ScreenItems screenItems;
 	private static final Random rand = new Random();
 	public final static int cSize = 10;
 	public final static int huntChance = 10;

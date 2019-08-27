@@ -33,6 +33,18 @@ public class SwingGa extends JFrame {
 	        super.paintComponent(g);       
 	    	Graphics2D g2d = (Graphics2D)  g;
 	    	simulationThread.drawScreenItems(g2d);
+	    	g2d.setFont( new Font(Font.DIALOG,  Font.BOLD, 20) );
+	    	g2d.setColor(Color.BLACK);
+	    	g2d.drawString("Hunter", 300, 30);
+	    	g2d.setColor(Color.WHITE);
+	    	g2d.fillRect(375, 10, 50, 25);
+	    	g2d.setColor(Color.BLACK);
+	    	g2d.drawString(Integer.toString( simulationThread.screenItems.hunterCritters.size()), 375, 30);
+	    	g2d.setColor(Color.WHITE);
+	    	g2d.fillRect(575, 10, 50, 25);
+	    	g2d.setColor(Color.BLACK);
+	    	g2d.drawString("Gather", 500, 30);
+	    	g2d.drawString(Integer.toString( simulationThread.screenItems.gatheringCritters.size()), 575, 30);
 	    }
 	}
 
