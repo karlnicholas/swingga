@@ -21,7 +21,7 @@ public class SimulationThread implements Runnable {
 	public final static int cSize = 10;
 	public final static int huntChance = 10;
 	public final static int MAX_CRITTERS = 500;
-	public static enum COLLISION_TYPE {GATHER, HUNTER}
+	public static enum COLLISION_TYPE {FOOD, GATHER, HUNTER}
 	public static final int MAX_MOVEMENT = 10;
 	public boolean run = true;
 	private int counter = 0;
@@ -288,6 +288,9 @@ public class SimulationThread implements Runnable {
     			if (newE > 10000) newE = 10000;
     			c.energy = newE;
     			fit.remove();
+    			Offset jOffset = c.getMovement().getCollision(COLLISION_TYPE.FOOD);
+    			c.move(jOffset);
+    			assessMovementCost(c, jOffset);
     			break;
     		}
     	}
