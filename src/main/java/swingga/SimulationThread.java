@@ -119,7 +119,7 @@ public class SimulationThread implements Runnable {
 		// take another generation.
 		if ( screenItems.hunterCritters.size() == 0 ) {
 			c = reproduceAndMutateHunterCritter(c);
-			c.energy = 1000;
+			c.energy = 500;
 			screenItems.hunterCritters.add(c);
 		}
 	}
@@ -165,7 +165,7 @@ public class SimulationThread implements Runnable {
 		// take another generation.
 		if ( screenItems.gatheringCritters.size() == 0 ) {
 			c = reproduceAndMutateGatheringCritter(c);
-			c.energy = 1000;
+			c.energy = 500;
 			screenItems.gatheringCritters.add(c);
 		}
 	}
