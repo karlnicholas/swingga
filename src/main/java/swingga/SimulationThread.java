@@ -38,16 +38,16 @@ public class SimulationThread implements Runnable {
 			screenItems.gatheringCritters.add(new Critter(
 				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
 				new CritterTuringMovement(), 
-				rand.nextInt(7999)+2000, 
-				rand.nextInt(79)+20
+				rand.nextInt(7950)+2000, 
+				rand.nextInt(60)+20
 			));
 		}
 		for ( int i = 0; i < 50; ++i ) {
 			screenItems.hunterCritters.add(new Critter(
 				cSize + (int)(Math.random() * 900), cSize + (int)(Math.random() * 900), 
 				new CritterTuringMovement(), 
-				rand.nextInt(7999)+2000, 
-				rand.nextInt(79)+20
+				rand.nextInt(7950)+2000, 
+				rand.nextInt(60)+20
 			));
 		}
 	}
@@ -248,7 +248,8 @@ public class SimulationThread implements Runnable {
 */			 
 	}
 	private void handleHunterCritterFoodCollision(Critter c, Critter c2, Offset offset) {
-		if ( rand.nextInt(Math.max(3, c.energy/1000+1)) == 0 ) {
+		int oneIn = (10000-(c.energy-c2.energy))/1000+1;
+		if ( rand.nextInt(Math.max(3,oneIn)) == 0 ) {		
 			c.energy += c2.energy;
 			if ( c.energy > 10000) {
 				c.energy = 10000;
@@ -267,7 +268,8 @@ public class SimulationThread implements Runnable {
 		}
 	}
 	private void handleHunterCritterHunterCollision(Critter c, Critter c2, Offset offset) {
-		if ( rand.nextInt((10000-(Math.max(0,c.energy-c2.energy))/1000)+1) == 0 ) {
+		int oneIn = (10000-(c.energy-c2.energy))/1000+1;
+		if ( rand.nextInt(Math.max(1,oneIn)) == 0 ) {		
 			c.energy += c2.energy;
 			if ( c.energy > 10000) {
 				c.energy = 10000;
@@ -316,7 +318,7 @@ public class SimulationThread implements Runnable {
 				fit.remove();
 			}
 		}
-		for ( int i = 0; i < 10; ++i) {
+		for ( int i = 0; i < 30; ++i) {
 			screenItems.foodStuffs.add(new Food(rand));
 		}
 /*		
@@ -328,10 +330,10 @@ public class SimulationThread implements Runnable {
 	}
 	private Critter reproduceAndMutateGatheringCritter(Critter c) {
 		// genetic reproduction callback code
-		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
+		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(9950, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
 		int op1 = (rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent);  
-		int re2 = rand.nextInt(7999)+2000; 
-		int op2 = rand.nextInt(79)+20;
+		int re2 = rand.nextInt(7950)+2000; 
+		int op2 = rand.nextInt(60)+20;
 		Critter cn = new Critter(
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
@@ -347,10 +349,10 @@ public class SimulationThread implements Runnable {
 	}
 	private Critter reproduceAndMutateHunterCritter(Critter c) {
 		// genetic reproduction callback code
-		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(8000, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
+		int re1 = (rand.nextInt( 10 ) == 0 ?  Math.max(2000, Math.min(9950, (10-rand.nextInt(21))+c.repEnergy)) : c.repEnergy);  
 		int op1 = (rand.nextInt( 10 ) == 0 ?  Math.max(20, Math.min(80, (1-rand.nextInt(3))+c.offspringPercent)) : c.offspringPercent);  
-		int re2 = rand.nextInt(7999)+2000; 
-		int op2 = rand.nextInt(79)+20;
+		int re2 = rand.nextInt(7950)+2000; 
+		int op2 = rand.nextInt(60)+20;
 		Critter cn = new Critter(
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.x)), 
 				Math.max(0, Math.min(1000, (10-rand.nextInt(21))+c.r.y)), 
@@ -366,12 +368,12 @@ public class SimulationThread implements Runnable {
 
 	public void drawScreenItems(Graphics2D g2d) {
 		synchronized( screenItems ) {
+			g2d.setColor(Color.GREEN);
+			screenItems.foodStuffs.forEach(f->g2d.fillOval(f.r.x, f.r.y, cSize, cSize));
 			g2d.setColor(Color.BLUE);
 			screenItems.gatheringCritters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
 			g2d.setColor(Color.RED);
 			screenItems.hunterCritters.forEach(c->g2d.fillOval(c.r.x, c.r.y, cSize, cSize));	    		
-			g2d.setColor(Color.GREEN);
-			screenItems.foodStuffs.forEach(f->g2d.fillOval(f.r.x, f.r.y, cSize, cSize));
 		}
 	}
 }
