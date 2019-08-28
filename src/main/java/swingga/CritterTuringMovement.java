@@ -14,7 +14,7 @@ public class CritterTuringMovement implements CritterMovement {
 	private static final Random rand = new Random();
 	private List<TuringMotion> motions = new ArrayList<>();
 	private static final int motionMax = 500;
-	private int[] moveLocs;
+	private int[] behaviorModeLocs;
 	// memory of last motion amount
 	private Offset offset;
 	private int turingLocation;
@@ -25,9 +25,9 @@ public class CritterTuringMovement implements CritterMovement {
 		for(int i=0; i<mCount; ++i) {
 			motions.add( new TuringMotion(rand, mCount));
 		}
-		moveLocs = new int[SimulationThread.MOVE_FUNCTION.values().length];
-		for ( int i = 0; i < SimulationThread.MOVE_FUNCTION.values().length; ++i ) {
-			moveLocs[i] = rand.nextInt(mCount);
+		behaviorModeLocs = new int[SimulationThread.BEHAVIOR_MODES.values().length];
+		for ( int i = 0; i < SimulationThread.BEHAVIOR_MODES.values().length; ++i ) {
+			behaviorModeLocs[i] = rand.nextInt(mCount);
 		}
 	}
 
@@ -40,7 +40,7 @@ public class CritterTuringMovement implements CritterMovement {
 		for(int i=0; i < critterTuringMovement.motions.size(); ++i) {
 			motions.add( new TuringMotion(critterTuringMovement.motions.get(i)));
 		}
-		moveLocs = Arrays.copyOf(critterTuringMovement.moveLocs, critterTuringMovement.moveLocs.length);
+		behaviorModeLocs = Arrays.copyOf(critterTuringMovement.behaviorModeLocs, critterTuringMovement.behaviorModeLocs.length);
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class CritterTuringMovement implements CritterMovement {
 	}
 	
 	@Override
-	public Offset getCollision(SimulationThread.MOVE_FUNCTION colType) {
-		turingLocation = moveLocs[colType.ordinal()]; 
+	public Offset getCollision(SimulationThread.BEHAVIOR_MODES colType) {
+		turingLocation = behaviorModeLocs[colType.ordinal()]; 
 		return getOffset(); 
 	}
 	
@@ -86,9 +86,9 @@ public class CritterTuringMovement implements CritterMovement {
 					if ( movement.motions.get(i).getGotoLocation() >= mCount )
 						movement.motions.get(i).setGotoLocation(rand.nextInt(mCount));
 				}				
-				for ( int i = 0; i < SimulationThread.MOVE_FUNCTION.values().length; ++i ) {
-					if ( movement.moveLocs[i] >= mCount )
-						movement.moveLocs[i] = rand.nextInt(mCount);
+				for ( int i = 0; i < SimulationThread.BEHAVIOR_MODES.values().length; ++i ) {
+					if ( movement.behaviorModeLocs[i] >= mCount )
+						movement.behaviorModeLocs[i] = rand.nextInt(mCount);
 				}
 			} else {
 				for ( int i=movement.motions.size(); i < mCount; ++i) {
