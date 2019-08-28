@@ -1,13 +1,15 @@
-## RED maybe eats BLUE or other RED 
+### RED eats BLUE or other RED 
 
-## BLUE eats GREEN
+### BLUE eats GREEN
 
-## Moving costs energy
+### Energy level matters
 
-## Living costs some energy
+### Different behavior modes (hungry, full, interaction)
 
-## Critters reproduce when enough energy
+### Moving, Living, costs energy
 
-## New Life is Cloned and maybe Mutated
+### Critters reproduce when enough energy
+
+### New Life is Cloned and maybe Mutated
 
 Github Repo: [https://github.com/karlnicholas/swingga](https://github.com/karlnicholas/swingga)
