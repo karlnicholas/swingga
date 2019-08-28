@@ -14,7 +14,7 @@ public class CritterTuringMovement implements CritterMovement {
 	private static final Random rand = new Random();
 	private List<TuringMotion> motions = new ArrayList<>();
 	private static final int motionMax = 500;
-	private int[] collisionLocs;
+	private int[] moveLocs;
 	// memory of last motion amount
 	private Offset offset;
 	private int turingLocation;
@@ -25,9 +25,9 @@ public class CritterTuringMovement implements CritterMovement {
 		for(int i=0; i<mCount; ++i) {
 			motions.add( new TuringMotion(rand, mCount));
 		}
-		collisionLocs = new int[SimulationThread.COLLISION_TYPE.values().length];
-		for ( int i = 0; i < SimulationThread.COLLISION_TYPE.values().length; ++i ) {
-			collisionLocs[i] = rand.nextInt(mCount);
+		moveLocs = new int[SimulationThread.MOVE_TYPE.values().length];
+		for ( int i = 0; i < SimulationThread.MOVE_TYPE.values().length; ++i ) {
+			moveLocs[i] = rand.nextInt(mCount);
 		}
 	}
 
@@ -40,7 +40,7 @@ public class CritterTuringMovement implements CritterMovement {
 		for(int i=0; i < critterTuringMovement.motions.size(); ++i) {
 			motions.add( new TuringMotion(critterTuringMovement.motions.get(i)));
 		}
-		collisionLocs = Arrays.copyOf(critterTuringMovement.collisionLocs, critterTuringMovement.collisionLocs.length);
+		moveLocs = Arrays.copyOf(critterTuringMovement.moveLocs, critterTuringMovement.moveLocs.length);
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class CritterTuringMovement implements CritterMovement {
 	}
 	
 	@Override
-	public Offset getCollision(SimulationThread.COLLISION_TYPE colType) {
-		turingLocation = collisionLocs[colType.ordinal()]; 
+	public Offset getCollision(SimulationThread.MOVE_TYPE colType) {
+		turingLocation = moveLocs[colType.ordinal()]; 
 		return getOffset(); 
 	}
 	
@@ -86,9 +86,9 @@ public class CritterTuringMovement implements CritterMovement {
 					if ( movement.motions.get(i).getGotoLocation() >= mCount )
 						movement.motions.get(i).setGotoLocation(rand.nextInt(mCount));
 				}				
-				for ( int i = 0; i < SimulationThread.COLLISION_TYPE.values().length; ++i ) {
-					if ( movement.collisionLocs[i] >= mCount )
-						movement.collisionLocs[i] = rand.nextInt(mCount);
+				for ( int i = 0; i < SimulationThread.MOVE_TYPE.values().length; ++i ) {
+					if ( movement.moveLocs[i] >= mCount )
+						movement.moveLocs[i] = rand.nextInt(mCount);
 				}
 			} else {
 				for ( int i=movement.motions.size(); i < mCount; ++i) {

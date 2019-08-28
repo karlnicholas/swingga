@@ -10,6 +10,7 @@ public class Critter {
 	public boolean living;
 	public int repEnergy;
 	public int offspringPercent;
+	public boolean hungry;
 
 	public Critter(int x, int y, CritterMovement movement, int repEnergy, int offspringPercent) {
 		this.movement = movement;
@@ -17,6 +18,7 @@ public class Critter {
 		living = true;
 		this.repEnergy = repEnergy;
 		this.offspringPercent = offspringPercent;
+		hungry = false;
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 package swingga;
 
-import swingga.SimulationThread.COLLISION_TYPE;
+import swingga.SimulationThread.MOVE_TYPE;
 
 /**
  * Interface for specific implementations of movements
@@ -9,7 +9,7 @@ import swingga.SimulationThread.COLLISION_TYPE;
 public interface CritterMovement {
 
 	public CritterMovement cloneAndMutate();
-	public Offset getCollision(COLLISION_TYPE colType);
+	public Offset getCollision(MOVE_TYPE colType);
 	public Offset getOffset();
 
 }
