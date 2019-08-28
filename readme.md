@@ -1,5 +1,4 @@
-## RED maybe eats BLUE and 
-## RED maybe eats RED if more energy
+## RED maybe eats BLUE or other RED 
 
 ## BLUE eats GREEN
 
