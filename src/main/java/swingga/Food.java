@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 public class Food {
-	private static final double stdevs = 3.0;
+	private static final double stdevs = 5.0;
 	int energy;
 	public Rectangle r;
 	public Food(Random rand) {

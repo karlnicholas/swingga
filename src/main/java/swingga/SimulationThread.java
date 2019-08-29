@@ -252,8 +252,8 @@ public class SimulationThread implements Runnable {
 */			 
 	}
 	private void handleHunterCritterFoodCollision(Critter c, Critter c2, Offset offset) {
-		int oneIn = (10000-(c.energy-c2.energy))/1000+1;
-		if ( rand.nextInt(Math.max(3,oneIn)) == 0 ) {		
+		int oneIn = c2.energy/1000+1;
+		if ( c.energy < 9000 && rand.nextInt(Math.max(3,oneIn)) == 0 ) {		
 			c.energy += c2.energy;
 			if ( c.energy > 10000) {
 				c.energy = 10000;
@@ -273,7 +273,7 @@ public class SimulationThread implements Runnable {
 	}
 	private void handleHunterCritterHunterCollision(Critter c, Critter c2, Offset offset) {
 		int oneIn = (10000-(c.energy-c2.energy))/1000+1;
-		if ( rand.nextInt(Math.max(1,oneIn)) == 0 ) {		
+		if ( c.energy < 9000 && rand.nextInt(Math.max(1,oneIn)) == 0 ) {		
 			c.energy += c2.energy;
 			if ( c.energy > 10000) {
 				c.energy = 10000;
@@ -289,6 +289,8 @@ public class SimulationThread implements Runnable {
 		}
 	}
 	private void checkFoodFound(Critter c) {
+		if ( c.energy >= 9000 )
+			return;
 		// check for food found, add to 
 		Iterator<Food> fit = screenItems.foodStuffs.iterator();
 		while ( fit.hasNext() ) {
@@ -322,7 +324,7 @@ public class SimulationThread implements Runnable {
 				fit.remove();
 			}
 		}
-		for ( int i = 0; i < 30; ++i) {
+		for ( int i = 0; i < 10; ++i) {
 			Food f = new Food(rand);
 			boolean no = true;
 			for ( Food fe: screenItems.foodStuffs ) {
