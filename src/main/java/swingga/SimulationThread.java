@@ -230,7 +230,8 @@ public class SimulationThread implements Runnable {
 	}
 	
 	private void assessMovementCost(Critter c, Offset offset) {
-		c.energy -= Math.max( Math.hypot(Math.abs(offset.mx), Math.abs(offset.my)), 1);
+		int amount =(int) Math.max( Math.hypot(Math.abs(offset.mx), Math.abs(offset.my)), 1);
+		c.energy -= amount;
 	}
 	
 	private void handleFoodCritterCollision(Critter c, Critter c2) {
@@ -252,7 +253,9 @@ public class SimulationThread implements Runnable {
 */			 
 	}
 	private void handleHunterCritterFoodCollision(Critter c, Critter c2, Offset offset) {
-		int oneIn = c2.energy/1000+1;
+//		int oneIn = c2.energy/1000+1;
+//		int oneIn = Math.max(c.energy, c2.energy)/1000+1;
+		int oneIn = Math.max( c2.energy - c.energy/3, 0)/1000+1;
 		if ( c.energy < 9000 && rand.nextInt(Math.max(3,oneIn)) == 0 ) {		
 			c.energy += c2.energy;
 			if ( c.energy > 10000) {
@@ -324,7 +327,7 @@ public class SimulationThread implements Runnable {
 				fit.remove();
 			}
 		}
-		for ( int i = 0; i < 10; ++i) {
+		for ( int i = 0; i < 30; ++i) {
 			Food f = new Food(rand);
 			boolean no = true;
 			for ( Food fe: screenItems.foodStuffs ) {
