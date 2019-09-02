@@ -50,7 +50,7 @@ public class SimulationThread implements Runnable {
 	
 	public SimulationThread(MyPanel myPanel) {
 		this.myPanel = myPanel;
-		pool = Executors.newFixedThreadPool(2);
+		pool = Executors.newFixedThreadPool(3);
 		//Collection<? extends Callable<?>> tasks = Stream.of(
 		Callable<Void> t1 = () -> {				
 			screenItems.gatheringCritters = stepCritters(
