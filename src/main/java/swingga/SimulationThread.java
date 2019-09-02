@@ -262,8 +262,10 @@ public class SimulationThread implements Runnable {
 			c2.living = false;
 		} else if ( c.energy > c2.energy ){			
 			c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+			c2.energy -= c.energy / 100;
 		} else if ( c2.energy > c.energy ){			
 			c.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+			c.energy -= c2.energy / 100;
 		}
 	}
 	private void checkFoodFound(Critter c) {
