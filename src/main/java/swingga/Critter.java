@@ -2,7 +2,7 @@ package swingga;
 
 import java.awt.Rectangle;
 
-public class Critter {
+public class Critter implements Comparable<Critter> {
 	// movement algorithm
 	private CritterMovement movement;
 	public Rectangle r; 
@@ -41,5 +41,18 @@ public class Critter {
 		if ( r.y < 0 ) r.y = 1000 + r.y;
 		if ( r.y > 1000 ) r.y = r.y - 1000;		
 	}
+	public int getEnergy() {
+		return energy;
+	}
+	public int getRepEnergy() {
+		return repEnergy;
+	}
+	public boolean getLiving() {
+		return living;
+	}
 
+	@Override
+	public int compareTo(Critter o) {
+		return energy - o.energy;
+	}
 }

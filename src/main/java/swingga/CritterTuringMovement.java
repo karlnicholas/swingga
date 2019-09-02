@@ -46,9 +46,9 @@ public class CritterTuringMovement implements CritterMovement {
 	@Override
 	public Offset getOffset() {
 		int xm = motions.get(turingLocation).getxAdjust();
-		offset.mx = Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, xm ));  
+		offset.mx = xm;  
 		int ym = motions.get(turingLocation).getyAdjust();
-		offset.my = Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, ym ));
+		offset.my = ym;
 		
 		turingLocation = motions.get(turingLocation).getGotoLocation();
 		return offset; 
@@ -67,13 +67,13 @@ public class CritterTuringMovement implements CritterMovement {
 		TuringMotion motion = movement.motions.get( mLoc );
 		switch(rand.nextInt(20)) {
 		case 0:
-			motion.setxAdjust(Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, motion.getxAdjust() + (1-rand.nextInt(3)))));
+			motion.setxAdjust(Util.within(-SimulationThread.MAX_MOVEMENT, SimulationThread.MAX_MOVEMENT, motion.getxAdjust() + Util.randPlusMinus(1)));
 			break;
 		case 1:
-			motion.setyAdjust(Math.max(-SimulationThread.MAX_MOVEMENT, Math.min(SimulationThread.MAX_MOVEMENT, motion.getyAdjust() + (1-rand.nextInt(3)))));
+			motion.setyAdjust(Util.within(-SimulationThread.MAX_MOVEMENT, SimulationThread.MAX_MOVEMENT, motion.getyAdjust() + Util.randPlusMinus(1)));
 			break;
 		case 2:
-			motion.setGotoLocation( Math.max(0, Math.min(movement.motions.size()-1, motion.getGotoLocation() + (1-rand.nextInt(3)))) );
+			motion.setGotoLocation(Util.within(0, movement.motions.size()-1, motion.getxAdjust() + Util.randPlusMinus(1)));
 			break;
 		case 3:
 			int mCount = rand.nextInt(motionMax-1) + 1;
@@ -97,10 +97,10 @@ public class CritterTuringMovement implements CritterMovement {
 			}
 			break;
 		case 4:
-			motion.setxAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
+			motion.setxAdjust(Util.randPlusMinus(SimulationThread.MAX_MOVEMENT));
 			break;
 		case 5:
-			motion.setyAdjust(SimulationThread.MAX_MOVEMENT - rand.nextInt(SimulationThread.MAX_MOVEMENT*2+1));
+			motion.setyAdjust(Util.randPlusMinus(SimulationThread.MAX_MOVEMENT));
 			break;
 		case 6:
 			motion.setGotoLocation( rand.nextInt(movement.motions.size()) );

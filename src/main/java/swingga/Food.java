@@ -2,9 +2,11 @@ package swingga;
 
 import java.awt.Rectangle;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Food {
-	private static final double stdevs = 5.0;
+	private static final double stdevs = 6.0;
+	AtomicBoolean eaten;
 	int energy;
 	public Rectangle r;
 	public Food(Random rand) {
@@ -19,5 +21,6 @@ public class Food {
 //		System.out.println("" + x + ":" + y);
 		r = new Rectangle(x, y, SimulationThread.cSize,  SimulationThread.cSize); 
 		this.energy = 1000;
+		eaten = new AtomicBoolean(false);
 	}
 }
