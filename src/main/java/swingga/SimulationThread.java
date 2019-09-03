@@ -68,7 +68,7 @@ public class SimulationThread implements Runnable {
 		};
 		Callable<Void> t3 =  () -> { 				
 			try {
-				Thread.sleep(75);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -106,26 +106,37 @@ public class SimulationThread implements Runnable {
 			counter++;
 			try {
 				List<Future<Void>> fs = pool.invokeAll(tasks);
-				for( Future<Void> f: fs)  {
-					f.get();
+				fs.get(0).get();
+				fs.get(1).get();
+				synchronized( screenItems ) {
+					// check for gather collisions
+					for( Critter h: screenItems.hunterCritters ) {
+						for( Critter g: screenItems.gatheringCritters ) {
+							if ( h.living == false || g.living == false ) continue;
+				    		if ( h.r.intersects(g.r) ) {
+		//		    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
+				    			collisionHunterOnGather(h, g, ()->rand.nextInt(7) == 0);
+	//			    			break;
+				    		}
+				    	}
+					}
+					removeEatenFood();
+	/*				
+	//				if ( counter % 100 == 0 ) {
+					if ( rand.nextInt(50) == 0 ) {
+						dropFood();
+					}
+	*/				
+					for ( int i = 0; i < 8; ++i) {
+						dropOneFood();
+					}
+					fs.get(2).get();
+					myPanel.repaint();
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 
-			synchronized( screenItems ) {
-				removeEatenFood();
-/*				
-//				if ( counter % 100 == 0 ) {
-				if ( rand.nextInt(50) == 0 ) {
-					dropFood();
-				}
-*/				
-				for ( int i = 0; i < 8; ++i) {
-					dropOneFood();
-				}
-				myPanel.repaint();
-			}
 		}
 	}
 	private List<Critter> stepCritters(List<Critter> critters, Predicate<Critter> moveHandler) {
@@ -164,12 +175,13 @@ public class SimulationThread implements Runnable {
 		c.move(offset);
 		assessMovementCost(c, offset);
 
+		/*		
 		// check for gather collisions
 		for( Critter c2: screenItems.gatheringCritters ) {
 			if ( c2.living == false ) continue;
-    		if ( c == c2) continue;
     		if ( c.r.intersects(c2.r) ) {
-    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
+//    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
+    			collisionHunterOnGather(c, c2, ()->rand.nextInt(7) == 0);
     			break;
     		}
     	}
@@ -182,6 +194,7 @@ public class SimulationThread implements Runnable {
     			break;
     		}
     	}
+*/    	
 		int newE = c.energy;
 		checkEnergyChange(c, oldE, newE);
 		return c.energy > 0 && c.living;
@@ -199,6 +212,16 @@ public class SimulationThread implements Runnable {
     		if ( c == c2) continue;
     		if ( c.r.intersects(c2.r) ) {
     			collisionGatherOnGather(c, c2);
+    			break;
+    		}
+    	}
+		// check for collisions
+		// check for gather collisions
+		for( Critter c2: screenItems.hunterCritters ) {
+			if ( c2.living == false ) continue;
+    		if ( c.r.intersects(c2.r) ) {
+//    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
+    			collisionHunterOnGather(c2, c, ()->rand.nextInt(7) == 0);
     			break;
     		}
     	}
@@ -245,27 +268,30 @@ public class SimulationThread implements Runnable {
 	private void collisionHunterOnGather(Critter c, Critter c2, ChanceFunction chanceFunction) {
 //		int oneIn = c2.energy/1000+1;
 //		int oneIn = Math.max(c.energy, c2.energy)/1000+1;
-		
-		if ( c2.living && c.energy < FULL_LEVEL && chanceFunction.evaluateChance() ) {		
-//			c.energy += c2.energy;
-			c.energy = Util.within(0, MAX_ENERGY, c.energy + HUNTER_EAT_FOOD_ENERGY);
-			c2.living = false;
-		} else {
-			c.energy -= c2.energy / 100;
-			c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+		if ( c2.living ) {
+			if ( c.energy < FULL_LEVEL && chanceFunction.evaluateChance() ) {		
+	//			c.energy += c2.energy;
+				c.energy = Util.within(0, MAX_ENERGY, c.energy + HUNTER_EAT_FOOD_ENERGY);
+				c2.living = false;
+			} else {
+				c.energy -= c2.energy / 100;
+				c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+			}
+			c.getMovement().getCollision(BEHAVIOR_MODES.GATHER);
 		}
-		c.getMovement().getCollision(BEHAVIOR_MODES.GATHER);
 	}
 	private void collisionHunterOnHunter(Critter c, Critter c2, ChanceFunction chanceFunction) {
-		if ( c.energy < FULL_LEVEL && chanceFunction.evaluateChance() ) {		
-			c.energy = Util.within(0, MAX_ENERGY, c.energy + HUNTER_EAT_FOOD_ENERGY/2);
-			c2.living = false;
-		} else if ( c.energy > c2.energy ){			
-			c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
-			c2.energy -= c.energy / 100;
-		} else if ( c2.energy > c.energy ){			
-			c.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
-			c.energy -= c2.energy / 100;
+		if ( c2.living ) {
+			if ( c.energy < FULL_LEVEL && chanceFunction.evaluateChance() ) {		
+				c.energy = Util.within(0, MAX_ENERGY, c.energy + HUNTER_EAT_FOOD_ENERGY/2);
+				c2.living = false;
+			} else if ( c.energy > c2.energy ){			
+				c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+			} else if ( c2.energy > c.energy ){			
+				c.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+			}
+			c2.energy -= c.energy / 500;
+			c.energy -= c2.energy / 500;
 		}
 	}
 	private void checkFoodFound(Critter c) {

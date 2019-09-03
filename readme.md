@@ -1,10 +1,8 @@
-### RED eats BLUE or other RED 
+### RED eats BLUE  
 
-### Missing can get you bitten/kicked.
+### BLUE kicks RED
 
 ### BLUE eats GREEN
-
-### Energy level matters
 
 ### Different behavior modes (hungry, full, interaction)
 
