@@ -115,7 +115,7 @@ public class SimulationThread implements Runnable {
 							if ( h.living == false || g.living == false ) continue;
 				    		if ( h.r.intersects(g.r) ) {
 		//		    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
-				    			collisionHunterOnGather(h, g, ()->rand.nextInt(7) == 0);
+				    			collisionHunterOnGather(h, g, ()->rand.nextInt(5) == 0);
 	//			    			break;
 				    		}
 				    	}
