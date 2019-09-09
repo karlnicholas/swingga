@@ -11,13 +11,17 @@ public class Critter implements Comparable<Critter> {
 	public int repEnergy;
 	public int offspringPercent;
 	public boolean hungry;
+	public int biteEnergy;
+	public int huntChance;
 
-	public Critter(int x, int y, CritterMovement movement, int repEnergy, int offspringPercent) {
+	public Critter(int x, int y, CritterMovement movement, int repEnergy, int offspringPercent, int biteEnergy, int huntChance) {
 		this.movement = movement;
 		r = new Rectangle(x, y, SimulationThread.cSize, SimulationThread.cSize);
 		living = true;
 		this.repEnergy = repEnergy;
 		this.offspringPercent = offspringPercent;
+		this.biteEnergy = biteEnergy;
+		this.huntChance = huntChance;
 		hungry = false;
 	}
 	
@@ -49,6 +53,12 @@ public class Critter implements Comparable<Critter> {
 	}
 	public boolean getLiving() {
 		return living;
+	}
+	public int getBiteEnergy() {
+		return biteEnergy;
+	}
+	public int getHuntChance() {
+		return huntChance;
 	}
 
 	@Override

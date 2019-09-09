@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Food {
-	private static final double stdevs = 6.0;
+	private static final double stdevs = 3.0;
 	AtomicBoolean eaten;
 	int energy;
 	public Rectangle r;

@@ -35,6 +35,9 @@ public class SimulationThread implements Runnable {
 	public final static int FULL_LEVEL = 9000;
 	public final static int GATHER_EAT_FOOD_ENERGY = 300;
 	public final static int HUNTER_EAT_FOOD_ENERGY = 1200;
+//	public final static int CRITTER_MAX_BITE_ENERGY = 10000;
+	public final static int HUNTER_FIGHT_ENERGY = 500;
+	public final static int HUNTER_SUCCESS_MIN_CHANCE = 5;
 	public final static int MAX_REP_LEVEL = 80;
 	public final static int MIN_REP_LEVEL = 20;
 	public final static int MAX_X = 1000;
@@ -85,7 +88,9 @@ public class SimulationThread implements Runnable {
 				rand.nextInt(MAX_X), rand.nextInt(MAX_X), 
 				new CritterTuringMovement(), 
 				rand.nextInt(FULL_LEVEL - HUNGRY_LEVEL)+HUNGRY_LEVEL, 
-				rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL
+				rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL, 
+				rand.nextInt(MAX_ENERGY), 
+				rand.nextInt(10)+1
 			));
 		}
 		for ( int i = 0; i < 50; ++i ) {
@@ -93,7 +98,9 @@ public class SimulationThread implements Runnable {
 					rand.nextInt(MAX_X), rand.nextInt(MAX_X), 
 				new CritterTuringMovement(), 
 				rand.nextInt(FULL_LEVEL - HUNGRY_LEVEL)+HUNGRY_LEVEL, 
-				rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL
+				rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL, 
+				rand.nextInt(MAX_ENERGY), 
+				rand.nextInt(10)+1
 			));
 		}
 	}
@@ -115,7 +122,7 @@ public class SimulationThread implements Runnable {
 							if ( h.living == false || g.living == false ) continue;
 				    		if ( h.r.intersects(g.r) ) {
 		//		    			collisionHunterOnGather(c, c2, ()->rand.nextInt(Math.max(3,Math.max( c2.energy - c.energy/3, 0)/1000+1)) == 0);
-				    			collisionHunterOnGather(h, g, ()->rand.nextInt(5) == 0);
+				    			collisionHunterOnGather(h, g);
 	//			    			break;
 				    		}
 				    	}
@@ -127,7 +134,7 @@ public class SimulationThread implements Runnable {
 						dropFood();
 					}
 	*/				
-					for ( int i = 0; i < 8; ++i) {
+					for ( int i = 0; i < 20; ++i) {
 						dropOneFood();
 					}
 					fs.get(2).get();
@@ -265,19 +272,24 @@ public class SimulationThread implements Runnable {
 			offset.my = 0;
 */			 
 	}
-	private void collisionHunterOnGather(Critter c, Critter c2, ChanceFunction chanceFunction) {
+	private void collisionHunterOnGather(Critter c, Critter c2) {
 //		int oneIn = c2.energy/1000+1;
 //		int oneIn = Math.max(c.energy, c2.energy)/1000+1;
 		if ( c2.living ) {
-			if ( c.energy < FULL_LEVEL && chanceFunction.evaluateChance() ) {		
+			if ( c.energy < FULL_LEVEL && c2.energy < c.biteEnergy * c.huntChance && rand.nextInt(c.huntChance) == 0 ) {
 	//			c.energy += c2.energy;
-				c.energy = Util.within(0, MAX_ENERGY, c.energy + HUNTER_EAT_FOOD_ENERGY);
+				c.energy += HUNTER_EAT_FOOD_ENERGY - c.biteEnergy/c.huntChance;
 				c2.living = false;
 			} else {
-				c.energy -= c2.energy / 100;
+//				c.energy -= ( Math.min( c.energy, c.biteEnergy) + Math.min( c2.energy, c2.biteEnergy));
 				c2.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
+				int c2b = Math.min( c2.biteEnergy, c2.energy)/c.huntChance;
+				c.energy -= c2b;
+				c2.energy -= c2b;
 			}
 			c.getMovement().getCollision(BEHAVIOR_MODES.GATHER);
+			if ( c.energy <= 0 ) c.living = false;
+			if ( c2.energy <= 0 ) c2.living = false;
 		}
 	}
 	private void collisionHunterOnHunter(Critter c, Critter c2, ChanceFunction chanceFunction) {
@@ -290,8 +302,8 @@ public class SimulationThread implements Runnable {
 			} else if ( c2.energy > c.energy ){			
 				c.getMovement().getCollision(BEHAVIOR_MODES.HUNTER);
 			}
-			c2.energy -= c.energy / 500;
-			c.energy -= c2.energy / 500;
+			c2.energy -= HUNTER_FIGHT_ENERGY;
+			c.energy -= HUNTER_FIGHT_ENERGY;
 		}
 	}
 	private void checkFoodFound(Critter c) {
@@ -355,14 +367,20 @@ public class SimulationThread implements Runnable {
 		// genetic reproduction callback code
 		int re1 = (rand.nextInt( 10 ) == 0 ?  Util.within(HUNGRY_LEVEL, FULL_LEVEL, c.repEnergy+Util.randPlusMinus(10)) : c.repEnergy);  
 		int op1 = (rand.nextInt( 10 ) == 0 ?  Util.within(MIN_REP_LEVEL, MAX_REP_LEVEL, c.offspringPercent+Util.randPlusMinus(2)) : c.offspringPercent);  
-		int re2 = rand.nextInt(FULL_LEVEL - HUNGRY_LEVEL)+HUNGRY_LEVEL;
-		int op2 = rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL;
+		int re2 = (rand.nextInt( 10 ) == 0 ?  rand.nextInt(FULL_LEVEL - HUNGRY_LEVEL)+HUNGRY_LEVEL : c.repEnergy);
+		int op2 = (rand.nextInt( 10 ) == 0 ?  rand.nextInt(MAX_REP_LEVEL - MIN_REP_LEVEL)+MIN_REP_LEVEL : c.offspringPercent);
+		int b1 = (rand.nextInt( 10 ) == 0 ?  c.biteEnergy + Util.randPlusMinus(100) : c.biteEnergy);
+		int b2 = (rand.nextInt( 10 ) == 0 ?  rand.nextInt(MAX_ENERGY) : c.biteEnergy); 
+		int hc1 = (rand.nextInt( 10 ) == 0 ?  Util.within(1, 100, Util.randPlusMinus(1)+c.huntChance) : c.huntChance);
+		int hc2 = (rand.nextInt( 10 ) == 0 ?  rand.nextInt(10)+1 : c.huntChance);
 		Critter cn = new Critter(
 				Util.within(0, 1000, Util.randPlusMinus(10)+c.r.x),  
 				Util.within(0, 1000, Util.randPlusMinus(10)+c.r.y),  
 				c.getMovement().cloneAndMutate(), 
 				(rand.nextBoolean() ? re1 : re2),  
-				(rand.nextBoolean() ? op1 : op2)  
+				(rand.nextBoolean() ? op1 : op2), 
+				(rand.nextBoolean() ? b1 : b2),
+				(rand.nextBoolean() ? hc1 : hc2)
 				);
 		// 
 		int eGiven = Math.round(((float)c.energy) / (100.0f / ((float)c.offspringPercent)));
